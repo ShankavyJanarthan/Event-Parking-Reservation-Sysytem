@@ -1,4 +1,3 @@
-using System.Text;
 using EventParkingReservationSystem.API.Configuration;
 using EventParkingReservationSystem.API.Data;
 using EventParkingReservationSystem.API.Helpers;
@@ -6,9 +5,11 @@ using EventParkingReservationSystem.API.Repositories.Implementations;
 using EventParkingReservationSystem.API.Repositories.Interfaces;
 using EventParkingReservationSystem.API.Services.Implementations;
 using EventParkingReservationSystem.API.Services.Interfaces;
+using EventVenueParkingSystem.API.Repositories.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddControllers();
 
 
 // =====================================================
-// Database - SQL Server + Entity Framework Core
+// Database
 // =====================================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
@@ -68,6 +69,16 @@ builder.Services.AddScoped<
     IEventRepository,
     EventRepository>();
 
+// Member 3 - Seat
+builder.Services.AddScoped<
+    ISeatRepository,
+    SeatRepository>();
+
+// Member 3 - Parking Slot
+builder.Services.AddScoped<
+    IParkingSlotRepository,
+    ParkingSlotRepository>();
+
 
 // =====================================================
 // Services
@@ -102,6 +113,16 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IEventService,
     EventService>();
+
+// Member 3 - Seat
+builder.Services.AddScoped<
+    ISeatService,
+    SeatService>();
+
+// Member 3 - Parking Slot
+builder.Services.AddScoped<
+    IParkingSlotService,
+    ParkingSlotService>();
 
 
 // =====================================================
@@ -212,20 +233,18 @@ if (app.Environment.IsDevelopment())
 // =====================================================
 app.UseHttpsRedirection();
 
-
-// Authentication MUST come before Authorization
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 
 // =====================================================
-// Map Controllers
+// Controllers
 // =====================================================
 app.MapControllers();
 
 
 // =====================================================
-// Run Application
+// Run
 // =====================================================
 app.Run();

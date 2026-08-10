@@ -3,7 +3,7 @@ using EventParkingReservationSystem.API.Models;
 using EventParkingReservationSystem.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventParkingReservationSystem.API.Repositories.Implementations
+namespace EventVenueParkingSystem.API.Repositories.Implementations
 {
     public class EventRepository : IEventRepository
     {
