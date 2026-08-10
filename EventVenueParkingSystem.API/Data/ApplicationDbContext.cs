@@ -22,6 +22,11 @@ namespace EventParkingReservationSystem.API.Data
 
         public DbSet<Event> Events { get; set; }
 
+        // Member 3
+        public DbSet<Seat> Seats { get; set; }
+
+        public DbSet<ParkingSlot> ParkingSlots { get; set; }
+
 
         protected override void OnModelCreating(
             ModelBuilder modelBuilder)
@@ -110,7 +115,6 @@ namespace EventParkingReservationSystem.API.Data
                 entity.Property(x => x.IsActive)
                     .IsRequired();
 
-                // Category names should not duplicate
                 entity.HasIndex(x => x.Name)
                     .IsUnique();
             });
@@ -147,23 +151,100 @@ namespace EventParkingReservationSystem.API.Data
                     .IsRequired()
                     .HasMaxLength(30);
 
-
-                // =================================================
                 // Event -> Venue
-                // =================================================
                 entity.HasOne(x => x.Venue)
                     .WithMany()
                     .HasForeignKey(x => x.VenueId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-
-                // =================================================
-                // Event -> EventCategory
-                // =================================================
+                // Event -> Event Category
                 entity.HasOne(x => x.EventCategory)
                     .WithMany()
                     .HasForeignKey(x => x.EventCategoryId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+
+            // =====================================================
+            // Seat
+            // =====================================================
+            modelBuilder.Entity<Seat>(entity =>
+            {
+                entity.HasKey(x => x.SeatId);
+
+                entity.Property(x => x.RowLabel)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(x => x.SeatNumber)
+                    .IsRequired();
+
+                entity.Property(x => x.SeatLabel)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(x => x.IsActive)
+                    .IsRequired();
+
+                // Seat belongs to Event
+                entity.HasOne(x => x.Event)
+                    .WithMany()
+                    .HasForeignKey(x => x.EventId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Prevent duplicate Row + Seat Number
+                // Example: Event 1 cannot have A10 twice
+                entity.HasIndex(x => new
+                {
+                    x.EventId,
+                    x.RowLabel,
+                    x.SeatNumber
+                })
+                .IsUnique();
+
+                // Prevent duplicate Seat Label
+                // Example: Event 1 cannot have A10 twice
+                entity.HasIndex(x => new
+                {
+                    x.EventId,
+                    x.SeatLabel
+                })
+                .IsUnique();
+            });
+
+
+            // =====================================================
+            // Parking Slot
+            // =====================================================
+            modelBuilder.Entity<ParkingSlot>(entity =>
+            {
+                entity.HasKey(x => x.ParkingSlotId);
+
+                entity.Property(x => x.SlotNumber)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(x => x.Fee)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(x => x.IsActive)
+                    .IsRequired();
+
+                // Parking Slot belongs to Event
+                entity.HasOne(x => x.Event)
+                    .WithMany()
+                    .HasForeignKey(x => x.EventId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Same parking slot number cannot repeat
+                // inside the same Event
+                entity.HasIndex(x => new
+                {
+                    x.EventId,
+                    x.SlotNumber
+                })
+                .IsUnique();
             });
         }
     }
