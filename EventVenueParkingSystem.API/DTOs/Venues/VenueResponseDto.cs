@@ -1,0 +1,21 @@
+﻿namespace EventParkingReservationSystem.API.DTOs.Venues
+{
+    public class VenueResponseDto
+    {
+        public int VenueId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public string Address { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public int Capacity { get; set; }
+
+        public bool IsAvailable { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
+    }
+}

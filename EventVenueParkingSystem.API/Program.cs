@@ -47,17 +47,61 @@ builder.Services.AddScoped<JwtHelper>();
 // =====================================================
 // Repositories
 // =====================================================
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+// Member 1 - Customer
+builder.Services.AddScoped<
+    ICustomerRepository,
+    CustomerRepository>();
+
+// Member 2 - Venue
+builder.Services.AddScoped<
+    IVenueRepository,
+    VenueRepository>();
+
+// Member 2 - Event Category
+builder.Services.AddScoped<
+    IEventCategoryRepository,
+    EventCategoryRepository>();
+
+// Member 2 - Event
+builder.Services.AddScoped<
+    IEventRepository,
+    EventRepository>();
 
 
 // =====================================================
 // Services
 // =====================================================
-builder.Services.AddScoped<IAuthService, AuthService>();
 
-builder.Services.AddScoped<ICustomerService, CustomerService>();
+// Member 1 - Authentication
+builder.Services.AddScoped<
+    IAuthService,
+    AuthService>();
 
-builder.Services.AddScoped<IEmailService, EmailService>();
+// Member 1 - Customer
+builder.Services.AddScoped<
+    ICustomerService,
+    CustomerService>();
+
+// Member 1 - Email
+builder.Services.AddScoped<
+    IEmailService,
+    EmailService>();
+
+// Member 2 - Venue
+builder.Services.AddScoped<
+    IVenueService,
+    VenueService>();
+
+// Member 2 - Event Category
+builder.Services.AddScoped<
+    IEventCategoryService,
+    EventCategoryService>();
+
+// Member 2 - Event
+builder.Services.AddScoped<
+    IEventService,
+    EventService>();
 
 
 // =====================================================
@@ -96,7 +140,6 @@ builder.Services
                 ValidateIssuerSigningKey = true,
 
                 ValidIssuer = jwtSettings.Issuer,
-
                 ValidAudience = jwtSettings.Audience,
 
                 IssuerSigningKey =
@@ -151,10 +194,8 @@ using (var scope = app.Services.CreateScope())
 // =====================================================
 if (app.Environment.IsDevelopment())
 {
-    // OpenAPI JSON
     app.MapOpenApi();
 
-    // Swagger UI
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint(
