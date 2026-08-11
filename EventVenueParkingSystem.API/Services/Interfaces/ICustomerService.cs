@@ -14,5 +14,7 @@ namespace EventParkingReservationSystem.API.Services.Interfaces
             string? search);
 
         Task<string> ReactivateAsync(int customerId);
+
+        Task<string> DeactivateAsync(int customerId);
     }
 }

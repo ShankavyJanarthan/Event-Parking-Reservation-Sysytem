@@ -25,7 +25,7 @@ namespace EventParkingReservationSystem.API.Controllers
         // =====================================================
         // Register Customer
         // POST: /api/customers/register
-        // Public endpoint
+        // Public
         // =====================================================
         [AllowAnonymous]
         [HttpPost("register")]
@@ -58,12 +58,13 @@ namespace EventParkingReservationSystem.API.Controllers
         // Get Customer Profile
         // GET: /api/customers/{id}
         //
-        // Customer -> own profile only
-        // Admin    -> any customer
+        // Customer -> Own profile only
+        // Admin    -> Any customer
         // =====================================================
         [Authorize]
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetCustomer(int id)
+        public async Task<IActionResult> GetCustomer(
+            int id)
         {
             try
             {
@@ -73,7 +74,8 @@ namespace EventParkingReservationSystem.API.Controllers
                 }
 
                 var customer =
-                    await _customerService.GetByIdAsync(id);
+                    await _customerService
+                        .GetByIdAsync(id);
 
                 return Ok(customer);
             }
@@ -91,8 +93,8 @@ namespace EventParkingReservationSystem.API.Controllers
         // Update Customer Profile
         // PUT: /api/customers/{id}
         //
-        // Customer -> own profile only
-        // Admin    -> allowed if required
+        // Customer -> Own profile only
+        // Admin    -> Any customer
         // =====================================================
         [Authorize]
         [HttpPut("{id:int}")]
@@ -108,7 +110,8 @@ namespace EventParkingReservationSystem.API.Controllers
                 }
 
                 var customer =
-                    await _customerService.UpdateAsync(id, dto);
+                    await _customerService
+                        .UpdateAsync(id, dto);
 
                 return Ok(customer);
             }
@@ -132,7 +135,7 @@ namespace EventParkingReservationSystem.API.Controllers
         // =====================================================
         // Search Customers
         // GET: /api/customers?search=jathu
-        // Admin only
+        // Admin Only
         // =====================================================
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -140,16 +143,58 @@ namespace EventParkingReservationSystem.API.Controllers
             [FromQuery] string? search)
         {
             var customers =
-                await _customerService.SearchAsync(search);
+                await _customerService
+                    .SearchAsync(search);
 
             return Ok(customers);
         }
 
 
         // =====================================================
+        // Deactivate Customer
+        // POST: /api/customers/{id}/deactivate
+        //
+        // Admin Only
+        // Cannot deactivate if customer has
+        // active future Pending / Confirmed bookings.
+        // =====================================================
+        [Authorize(Roles = "Admin")]
+        [HttpPost("{id:int}/deactivate")]
+        public async Task<IActionResult> DeactivateCustomer(
+            int id)
+        {
+            try
+            {
+                var message =
+                    await _customerService
+                        .DeactivateAsync(id);
+
+                return Ok(new
+                {
+                    message
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
+                {
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        // =====================================================
         // Reactivate Customer
         // POST: /api/customers/{id}/reactivate
-        // Admin only
+        // Admin Only
         // =====================================================
         [Authorize(Roles = "Admin")]
         [HttpPost("{id:int}/reactivate")]
@@ -159,7 +204,8 @@ namespace EventParkingReservationSystem.API.Controllers
             try
             {
                 var message =
-                    await _customerService.ReactivateAsync(id);
+                    await _customerService
+                        .ReactivateAsync(id);
 
                 return Ok(new
                 {
@@ -186,7 +232,8 @@ namespace EventParkingReservationSystem.API.Controllers
         // =====================================================
         // Customer Access Validation
         // =====================================================
-        private bool CanAccessCustomer(int customerId)
+        private bool CanAccessCustomer(
+            int customerId)
         {
             // Admin can access any customer
             if (User.IsInRole("Admin"))
@@ -195,7 +242,8 @@ namespace EventParkingReservationSystem.API.Controllers
             }
 
             var customerIdClaim =
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                User.FindFirst(
+                    ClaimTypes.NameIdentifier)?.Value;
 
             if (!int.TryParse(
                     customerIdClaim,
@@ -204,7 +252,7 @@ namespace EventParkingReservationSystem.API.Controllers
                 return false;
             }
 
-            // Normal customer can access own profile only
+            // Customer can access own profile only
             return loggedInCustomerId == customerId;
         }
     }

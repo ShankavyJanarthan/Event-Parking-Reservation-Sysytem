@@ -12,20 +12,34 @@ namespace EventParkingReservationSystem.API.Data
         }
 
         // =====================================================
-        // Tables
+        // Member 1
         // =====================================================
         public DbSet<Customer> Customers { get; set; }
 
+        // =====================================================
+        // Member 2
+        // =====================================================
         public DbSet<Venue> Venues { get; set; }
 
         public DbSet<EventCategory> EventCategories { get; set; }
 
         public DbSet<Event> Events { get; set; }
 
+        // =====================================================
         // Member 3
+        // =====================================================
         public DbSet<Seat> Seats { get; set; }
 
         public DbSet<ParkingSlot> ParkingSlots { get; set; }
+
+        // =====================================================
+        // Member 4
+        // =====================================================
+        public DbSet<Booking> Bookings { get; set; }
+
+        public DbSet<Payment> Payments { get; set; }
+
+        public DbSet<Notification> Notifications { get; set; }
 
 
         protected override void OnModelCreating(
@@ -33,10 +47,9 @@ namespace EventParkingReservationSystem.API.Data
         {
             base.OnModelCreating(modelBuilder);
 
-
-            // =====================================================
+            // =================================================
             // Customer
-            // =====================================================
+            // =================================================
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.HasKey(x => x.CustomerId);
@@ -51,7 +64,7 @@ namespace EventParkingReservationSystem.API.Data
 
                 entity.Property(x => x.Email)
                     .IsRequired()
-                    .HasMaxLength(255);
+                    .HasMaxLength(200);
 
                 entity.Property(x => x.Phone)
                     .HasMaxLength(30);
@@ -61,20 +74,20 @@ namespace EventParkingReservationSystem.API.Data
 
                 entity.Property(x => x.Role)
                     .IsRequired()
-                    .HasMaxLength(20);
+                    .HasMaxLength(30);
 
                 entity.Property(x => x.Status)
                     .IsRequired()
-                    .HasMaxLength(20);
+                    .HasMaxLength(30);
 
                 entity.HasIndex(x => x.Email)
                     .IsUnique();
             });
 
 
-            // =====================================================
+            // =================================================
             // Venue
-            // =====================================================
+            // =================================================
             modelBuilder.Entity<Venue>(entity =>
             {
                 entity.HasKey(x => x.VenueId);
@@ -85,22 +98,19 @@ namespace EventParkingReservationSystem.API.Data
 
                 entity.Property(x => x.Address)
                     .IsRequired()
-                    .HasMaxLength(500);
+                    .HasMaxLength(300);
 
                 entity.Property(x => x.Description)
                     .HasMaxLength(1000);
 
                 entity.Property(x => x.Capacity)
                     .IsRequired();
-
-                entity.Property(x => x.IsAvailable)
-                    .IsRequired();
             });
 
 
-            // =====================================================
+            // =================================================
             // Event Category
-            // =====================================================
+            // =================================================
             modelBuilder.Entity<EventCategory>(entity =>
             {
                 entity.HasKey(x => x.EventCategoryId);
@@ -112,17 +122,14 @@ namespace EventParkingReservationSystem.API.Data
                 entity.Property(x => x.Description)
                     .HasMaxLength(500);
 
-                entity.Property(x => x.IsActive)
-                    .IsRequired();
-
                 entity.HasIndex(x => x.Name)
                     .IsUnique();
             });
 
 
-            // =====================================================
+            // =================================================
             // Event
-            // =====================================================
+            // =================================================
             modelBuilder.Entity<Event>(entity =>
             {
                 entity.HasKey(x => x.EventId);
@@ -134,30 +141,21 @@ namespace EventParkingReservationSystem.API.Data
                 entity.Property(x => x.Description)
                     .HasMaxLength(1000);
 
-                entity.Property(x => x.StartDateTime)
-                    .IsRequired();
-
-                entity.Property(x => x.EndDateTime)
-                    .IsRequired();
-
                 entity.Property(x => x.Capacity)
                     .IsRequired();
 
                 entity.Property(x => x.TicketPrice)
-                    .HasColumnType("decimal(18,2)")
-                    .IsRequired();
+                    .HasColumnType("decimal(18,2)");
 
                 entity.Property(x => x.Status)
                     .IsRequired()
                     .HasMaxLength(30);
 
-                // Event -> Venue
                 entity.HasOne(x => x.Venue)
                     .WithMany()
                     .HasForeignKey(x => x.VenueId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // Event -> Event Category
                 entity.HasOne(x => x.EventCategory)
                     .WithMany()
                     .HasForeignKey(x => x.EventCategoryId)
@@ -165,9 +163,9 @@ namespace EventParkingReservationSystem.API.Data
             });
 
 
-            // =====================================================
+            // =================================================
             // Seat
-            // =====================================================
+            // =================================================
             modelBuilder.Entity<Seat>(entity =>
             {
                 entity.HasKey(x => x.SeatId);
@@ -183,17 +181,12 @@ namespace EventParkingReservationSystem.API.Data
                     .IsRequired()
                     .HasMaxLength(50);
 
-                entity.Property(x => x.IsActive)
-                    .IsRequired();
-
-                // Seat belongs to Event
                 entity.HasOne(x => x.Event)
                     .WithMany()
                     .HasForeignKey(x => x.EventId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Prevent duplicate Row + Seat Number
-                // Example: Event 1 cannot have A10 twice
+                // Same row + seat number cannot duplicate
                 entity.HasIndex(x => new
                 {
                     x.EventId,
@@ -202,8 +195,7 @@ namespace EventParkingReservationSystem.API.Data
                 })
                 .IsUnique();
 
-                // Prevent duplicate Seat Label
-                // Example: Event 1 cannot have A10 twice
+                // Seat label must also be unique per event
                 entity.HasIndex(x => new
                 {
                     x.EventId,
@@ -213,9 +205,9 @@ namespace EventParkingReservationSystem.API.Data
             });
 
 
-            // =====================================================
+            // =================================================
             // Parking Slot
-            // =====================================================
+            // =================================================
             modelBuilder.Entity<ParkingSlot>(entity =>
             {
                 entity.HasKey(x => x.ParkingSlotId);
@@ -225,26 +217,178 @@ namespace EventParkingReservationSystem.API.Data
                     .HasMaxLength(50);
 
                 entity.Property(x => x.Fee)
-                    .HasColumnType("decimal(18,2)")
-                    .IsRequired();
+                    .HasColumnType("decimal(18,2)");
 
-                entity.Property(x => x.IsActive)
-                    .IsRequired();
-
-                // Parking Slot belongs to Event
                 entity.HasOne(x => x.Event)
                     .WithMany()
                     .HasForeignKey(x => x.EventId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Same parking slot number cannot repeat
-                // inside the same Event
                 entity.HasIndex(x => new
                 {
                     x.EventId,
                     x.SlotNumber
                 })
                 .IsUnique();
+            });
+
+
+            // =================================================
+            // Booking
+            // =================================================
+            modelBuilder.Entity<Booking>(entity =>
+            {
+                entity.HasKey(x => x.BookingId);
+
+                entity.Property(x => x.BookingNumber)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(x => x.Status)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(x => x.SeatPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(x => x.ParkingFee)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(x => x.TotalAmount)
+                    .HasColumnType("decimal(18,2)");
+
+                // Booking number must always be unique
+                entity.HasIndex(x => x.BookingNumber)
+                    .IsUnique();
+
+
+                // ---------------------------------------------
+                // Customer
+                // ---------------------------------------------
+                entity.HasOne(x => x.Customer)
+                    .WithMany()
+                    .HasForeignKey(x => x.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                // ---------------------------------------------
+                // Event
+                // ---------------------------------------------
+                entity.HasOne(x => x.Event)
+                    .WithMany()
+                    .HasForeignKey(x => x.EventId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                // ---------------------------------------------
+                // Seat
+                // ---------------------------------------------
+                entity.HasOne(x => x.Seat)
+                    .WithMany()
+                    .HasForeignKey(x => x.SeatId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                // ---------------------------------------------
+                // Optional Parking
+                // ---------------------------------------------
+                entity.HasOne(x => x.ParkingSlot)
+                    .WithMany()
+                    .HasForeignKey(x => x.ParkingSlotId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                // ---------------------------------------------
+                // Prevent active double booking of a Seat
+                //
+                // Cancelled / Expired booking will not block
+                // the seat from being booked again.
+                // ---------------------------------------------
+                entity.HasIndex(x => x.SeatId)
+                    .IsUnique()
+                    .HasFilter(
+                        "[Status] IN ('Pending', 'Confirmed')");
+
+
+                // ---------------------------------------------
+                // Prevent active double booking of Parking
+                //
+                // Null parking is allowed.
+                // Cancelled / Expired booking will not block
+                // the parking slot from being reused.
+                // ---------------------------------------------
+                entity.HasIndex(x => x.ParkingSlotId)
+                    .IsUnique()
+                    .HasFilter(
+                        "[ParkingSlotId] IS NOT NULL AND [Status] IN ('Pending', 'Confirmed')");
+            });
+
+
+            // =================================================
+            // Payment
+            // =================================================
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.HasKey(x => x.PaymentId);
+
+                entity.Property(x => x.Amount)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(x => x.PaymentMethod)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(x => x.Status)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(x => x.TransactionReference)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.HasOne(x => x.Booking)
+                    .WithMany()
+                    .HasForeignKey(x => x.BookingId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Only one payment record for a booking
+                entity.HasIndex(x => x.BookingId)
+                    .IsUnique();
+
+                // Payment reference must be unique
+                entity.HasIndex(x => x.TransactionReference)
+                    .IsUnique();
+            });
+
+
+            // =================================================
+            // Notification
+            // =================================================
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(x => x.NotificationId);
+
+                entity.Property(x => x.Type)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(x => x.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(x => x.Message)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.HasOne(x => x.Customer)
+                    .WithMany()
+                    .HasForeignKey(x => x.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Booking)
+                    .WithMany()
+                    .HasForeignKey(x => x.BookingId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

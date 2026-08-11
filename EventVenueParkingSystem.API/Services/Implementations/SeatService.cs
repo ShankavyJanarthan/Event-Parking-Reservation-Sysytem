@@ -9,13 +9,16 @@ namespace EventParkingReservationSystem.API.Services.Implementations
     {
         private readonly ISeatRepository _seatRepository;
         private readonly IEventRepository _eventRepository;
+        private readonly IBookingRepository _bookingRepository;
 
         public SeatService(
             ISeatRepository seatRepository,
-            IEventRepository eventRepository)
+            IEventRepository eventRepository,
+            IBookingRepository bookingRepository)
         {
             _seatRepository = seatRepository;
             _eventRepository = eventRepository;
+            _bookingRepository = bookingRepository;
         }
 
         // =====================================================
@@ -137,6 +140,7 @@ namespace EventParkingReservationSystem.API.Services.Implementations
 
         // =====================================================
         // Update Seat
+        // Cannot update an actively reserved/booked seat
         // =====================================================
         public async Task<SeatResponseDto> UpdateAsync(
             int seatId,
@@ -149,6 +153,17 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             {
                 throw new KeyNotFoundException(
                     "Seat was not found.");
+            }
+
+            var hasActiveBooking =
+                await _bookingRepository
+                    .HasActiveBookingForSeatAsync(
+                        seatId);
+
+            if (hasActiveBooking)
+            {
+                throw new InvalidOperationException(
+                    "This seat cannot be updated because it is currently reserved or booked.");
             }
 
             var duplicateExists =
@@ -185,7 +200,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             await _seatRepository.SaveChangesAsync();
 
             var updatedSeat =
-                await _seatRepository.GetByIdAsync(seatId);
+                await _seatRepository.GetByIdAsync(
+                    seatId);
 
             if (updatedSeat == null)
             {
@@ -198,6 +214,7 @@ namespace EventParkingReservationSystem.API.Services.Implementations
 
         // =====================================================
         // Delete Seat
+        // Cannot delete an actively reserved/booked seat
         // =====================================================
         public async Task<string> DeleteAsync(
             int seatId)
@@ -211,8 +228,16 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "Seat was not found.");
             }
 
-            // Later Member 4 Booking integration:
-            // Prevent deletion if seat is already booked.
+            var hasActiveBooking =
+                await _bookingRepository
+                    .HasActiveBookingForSeatAsync(
+                        seatId);
+
+            if (hasActiveBooking)
+            {
+                throw new InvalidOperationException(
+                    "This seat cannot be deleted because it is currently reserved or booked.");
+            }
 
             await _seatRepository.DeleteAsync(seat);
 
@@ -268,24 +293,32 @@ namespace EventParkingReservationSystem.API.Services.Implementations
         {
             return new SeatResponseDto
             {
-                SeatId = seat.SeatId,
+                SeatId =
+                    seat.SeatId,
 
-                EventId = seat.EventId,
+                EventId =
+                    seat.EventId,
 
                 EventName =
                     seat.Event?.Name ?? string.Empty,
 
-                RowLabel = seat.RowLabel,
+                RowLabel =
+                    seat.RowLabel,
 
-                SeatNumber = seat.SeatNumber,
+                SeatNumber =
+                    seat.SeatNumber,
 
-                SeatLabel = seat.SeatLabel,
+                SeatLabel =
+                    seat.SeatLabel,
 
-                IsActive = seat.IsActive,
+                IsActive =
+                    seat.IsActive,
 
-                CreatedAt = seat.CreatedAt,
+                CreatedAt =
+                    seat.CreatedAt,
 
-                UpdatedAt = seat.UpdatedAt
+                UpdatedAt =
+                    seat.UpdatedAt
             };
         }
     }
