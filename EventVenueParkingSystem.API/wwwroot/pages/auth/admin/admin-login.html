@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Admin Login
+    </title>
+
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+
+</head>
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Admin Login
+        </h1>
+
+
+
+        <input id="email"
+               placeholder="Admin Email">
+
+
+
+        <input id="password"
+               type="password"
+               placeholder="Password">
+
+
+
+        <button class="btn green"
+                onclick="adminLogin()">
+
+            Login
+
+        </button>
+
+
+
+        <p id="msg"></p>
+
+
+    </div>
+
+
+
+    <script src="../../js/config.js"></script>
+
+    <script src="../../js/api.js"></script>
+
+
+
+    <script>
+
+
+async function adminLogin()
+{
+
+
+let data = {
+
+
+email:
+document.getElementById("email").value,
+
+
+password:
+document.getElementById("password").value
+
+
+};
+
+
+
+try
+{
+
+
+let result =
+await apiCall(
+
+"/auth/login",
+
+"POST",
+
+data
+
+);
+
+
+
+localStorage.setItem(
+CONFIG.TOKEN,
+result.token
+);
+
+
+
+window.location.href =
+"../admin/dashboard.html";
+
+
+}
+
+
+catch(error)
+{
+
+
+document.getElementById("msg")
+.innerHTML =
+"Invalid Admin Login";
+
+
+}
+
+
+
+}
+
+
+    </script>
+
+
+
+</body>
+
+</html>

@@ -1,45 +1,91 @@
 ﻿async function pay() {
 
 
-    let id =
-        Number(
-            document.getElementById("bookingId").value
-        );
+    let card =
+        document.getElementById("card").value;
+
+
+    let cvv =
+        document.getElementById("cvv").value;
 
 
 
-    let data = {
+    if (card.length < 12) {
 
-        paymentMethod: "Simulated"
+        msg.innerHTML =
+            "Enter valid card number";
 
-    };
+        return;
+
+    }
+
+
+
+    if (cvv.length < 3) {
+
+        msg.innerHTML =
+            "Invalid CVV";
+
+        return;
+
+    }
+
+
+
+    document.getElementById("loader")
+        .innerHTML =
+        "Processing Payment...";
+
+
+
+    let bookingId =
+        localStorage.getItem("bookingId");
 
 
 
     try {
 
 
-        let result =
-            await apiCall(
-                "/payments/booking/" + id,
-                "POST",
-                data
-            );
+        await apiCall(
+
+            "/payments/booking/" + bookingId,
+
+            "POST",
+
+            {
+
+                paymentMethod:
+                    document.getElementById("method").value
+
+            }
+
+        );
 
 
 
-        document.getElementById("msg")
-            .innerHTML =
-            "Payment Successful";
+        msg.innerHTML =
+            "✅ Payment Successful";
+
+
+        setTimeout(() => {
+
+
+            window.location.href =
+                "bookings.html";
+
+
+        }, 1500);
+
 
 
     }
 
-    catch (error) {
+    catch (e) {
 
-        document.getElementById("msg")
-            .innerHTML =
+
+        msg.innerHTML =
             "Payment Failed";
+
 
     }
 

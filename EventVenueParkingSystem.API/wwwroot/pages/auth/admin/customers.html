@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Customers</title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+</head>
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Customer Management
+        </h1>
+
+
+        <input id="search"
+               placeholder="Search Customer">
+
+
+        <button class="btn"
+                onclick="loadCustomers()">
+
+            Search
+
+        </button>
+
+
+        <div id="list"></div>
+
+
+    </div>
+
+
+
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api.js"></script>
+
+
+    <script>
+
+
+        async function loadCustomers() {
+
+
+            let data =
+                await apiCall(
+                    "/customers?search="
+                    +
+                    document.getElementById("search").value
+                );
+
+
+
+            let html = "";
+
+
+            data.forEach(c => {
+
+
+                html += `
+
+<div class="card">
+
+<h3>
+${c.fullName}
+</h3>
+
+
+<p>
+${c.email}
+</p>
+
+
+<button class="btn red">
+
+Deactivate
+
+</button>
+
+
+</div>
+
+`;
+
+
+            });
+
+
+            document.getElementById("list").innerHTML = html;
+
+
+        }
+
+
+
+    </script>
+
+
+</body>
+
+</html>
