@@ -8,11 +8,14 @@ namespace EventParkingReservationSystem.API.Services.Implementations
     public class CustomerService : ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
+        private readonly IBookingRepository _bookingRepository;
 
         public CustomerService(
-            ICustomerRepository customerRepository)
+            ICustomerRepository customerRepository,
+            IBookingRepository bookingRepository)
         {
             _customerRepository = customerRepository;
+            _bookingRepository = bookingRepository;
         }
 
         // =====================================================
@@ -91,6 +94,67 @@ namespace EventParkingReservationSystem.API.Services.Implementations
         }
 
         // =====================================================
+        // Deactivate Customer - Admin use
+        //
+        // Customer cannot be deactivated when they have
+        // an active future Pending / Confirmed booking.
+        // =====================================================
+        public async Task<string> DeactivateAsync(
+            int customerId)
+        {
+            var customer =
+                await _customerRepository.GetByIdAsync(
+                    customerId);
+
+            if (customer == null)
+            {
+                throw new KeyNotFoundException(
+                    "Customer was not found.");
+            }
+
+            if (customer.Role.Equals(
+                    "Admin",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "Admin accounts cannot be deactivated through this operation.");
+            }
+
+            if (customer.Status.Equals(
+                    "Deactivated",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "Customer account is already deactivated.");
+            }
+
+            var hasActiveFutureBooking =
+                await _bookingRepository
+                    .HasActiveFutureBookingsForCustomerAsync(
+                        customerId);
+
+            if (hasActiveFutureBooking)
+            {
+                throw new InvalidOperationException(
+                    "Customer account cannot be deactivated because there is an active future booking.");
+            }
+
+            customer.Status =
+                "Deactivated";
+
+            customer.UpdatedAt =
+                DateTime.UtcNow;
+
+            await _customerRepository.UpdateAsync(
+                customer);
+
+            await _customerRepository.SaveChangesAsync();
+
+            return
+                "Customer account deactivated successfully.";
+        }
+
+        // =====================================================
         // Reactivate Customer - Admin use
         // =====================================================
         public async Task<string> ReactivateAsync(
@@ -113,16 +177,19 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "Customer account is already active.");
             }
 
-            customer.Status = "Active";
+            customer.Status =
+                "Active";
 
             customer.UpdatedAt =
                 DateTime.UtcNow;
 
-            await _customerRepository.UpdateAsync(customer);
+            await _customerRepository.UpdateAsync(
+                customer);
 
             await _customerRepository.SaveChangesAsync();
 
-            return "Customer account reactivated successfully.";
+            return
+                "Customer account reactivated successfully.";
         }
 
         // =====================================================
@@ -133,22 +200,29 @@ namespace EventParkingReservationSystem.API.Services.Implementations
         {
             return new CustomerResponseDto
             {
-                CustomerId = customer.CustomerId,
+                CustomerId =
+                    customer.CustomerId,
 
-                FirstName = customer.FirstName,
+                FirstName =
+                    customer.FirstName,
 
-                LastName = customer.LastName,
+                LastName =
+                    customer.LastName,
 
                 FullName =
                     $"{customer.FirstName} {customer.LastName}",
 
-                Email = customer.Email,
+                Email =
+                    customer.Email,
 
-                Phone = customer.Phone,
+                Phone =
+                    customer.Phone,
 
-                Role = customer.Role,
+                Role =
+                    customer.Role,
 
-                Status = customer.Status,
+                Status =
+                    customer.Status,
 
                 EmailVerified =
                     customer.EmailVerified,

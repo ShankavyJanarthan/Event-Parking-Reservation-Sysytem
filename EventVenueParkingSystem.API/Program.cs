@@ -1,3 +1,4 @@
+using EventParkingReservationSystem.API.BackgroundServices;
 using EventParkingReservationSystem.API.Configuration;
 using EventParkingReservationSystem.API.Data;
 using EventParkingReservationSystem.API.Helpers;
@@ -24,17 +25,20 @@ builder.Services.AddControllers();
 // =====================================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString(
+            "DefaultConnection")));
 
 
 // =====================================================
 // Configuration
 // =====================================================
 builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("JwtSettings"));
+    builder.Configuration.GetSection(
+        "JwtSettings"));
 
 builder.Services.Configure<EmailSettings>(
-    builder.Configuration.GetSection("EmailSettings"));
+    builder.Configuration.GetSection(
+        "EmailSettings"));
 
 
 // =====================================================
@@ -78,6 +82,26 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IParkingSlotRepository,
     ParkingSlotRepository>();
+
+// Member 4 - Booking
+builder.Services.AddScoped<
+    IBookingRepository,
+    BookingRepository>();
+
+// Member 4 - Payment
+builder.Services.AddScoped<
+    IPaymentRepository,
+    PaymentRepository>();
+
+// Member 4 - Notification
+builder.Services.AddScoped<
+    INotificationRepository,
+    NotificationRepository>();
+
+// Member 4 - Dashboard
+builder.Services.AddScoped<
+    IDashboardRepository,
+    DashboardRepository>();
 
 
 // =====================================================
@@ -124,6 +148,33 @@ builder.Services.AddScoped<
     IParkingSlotService,
     ParkingSlotService>();
 
+// Member 4 - Booking
+builder.Services.AddScoped<
+    IBookingService,
+    BookingService>();
+
+// Member 4 - Payment
+builder.Services.AddScoped<
+    IPaymentService,
+    PaymentService>();
+
+// Member 4 - Notification
+builder.Services.AddScoped<
+    INotificationService,
+    NotificationService>();
+
+// Member 4 - Dashboard
+builder.Services.AddScoped<
+    IDashboardService,
+    DashboardService>();
+
+
+// =====================================================
+// Background Services
+// =====================================================
+builder.Services.AddHostedService<
+    BookingExpiryBackgroundService>();
+
 
 // =====================================================
 // JWT Settings
@@ -149,7 +200,8 @@ if (string.IsNullOrWhiteSpace(jwtSettings.Key))
 // JWT Authentication
 // =====================================================
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddAuthentication(
+        JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters =
@@ -160,15 +212,19 @@ builder.Services
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
 
-                ValidIssuer = jwtSettings.Issuer,
-                ValidAudience = jwtSettings.Audience,
+                ValidIssuer =
+                    jwtSettings.Issuer,
+
+                ValidAudience =
+                    jwtSettings.Audience,
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(
                             jwtSettings.Key)),
 
-                ClockSkew = TimeSpan.Zero
+                ClockSkew =
+                    TimeSpan.Zero
             };
     });
 
@@ -196,13 +252,16 @@ var app = builder.Build();
 // =====================================================
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+    var services =
+        scope.ServiceProvider;
 
     var context =
-        services.GetRequiredService<ApplicationDbContext>();
+        services.GetRequiredService<
+            ApplicationDbContext>();
 
     var passwordHelper =
-        services.GetRequiredService<PasswordHelper>();
+        services.GetRequiredService<
+            PasswordHelper>();
 
     await DbInitializer.InitializeAsync(
         context,
@@ -223,7 +282,8 @@ if (app.Environment.IsDevelopment())
             "/openapi/v1.json",
             "Event Venue Parking System API v1");
 
-        options.RoutePrefix = "swagger";
+        options.RoutePrefix =
+            "swagger";
     });
 }
 

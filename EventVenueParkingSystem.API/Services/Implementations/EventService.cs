@@ -10,15 +10,21 @@ namespace EventParkingReservationSystem.API.Services.Implementations
         private readonly IEventRepository _eventRepository;
         private readonly IVenueRepository _venueRepository;
         private readonly IEventCategoryRepository _eventCategoryRepository;
+        private readonly ISeatRepository _seatRepository;
+        private readonly IBookingRepository _bookingRepository;
 
         public EventService(
             IEventRepository eventRepository,
             IVenueRepository venueRepository,
-            IEventCategoryRepository eventCategoryRepository)
+            IEventCategoryRepository eventCategoryRepository,
+            ISeatRepository seatRepository,
+            IBookingRepository bookingRepository)
         {
             _eventRepository = eventRepository;
             _venueRepository = venueRepository;
             _eventCategoryRepository = eventCategoryRepository;
+            _seatRepository = seatRepository;
+            _bookingRepository = bookingRepository;
         }
 
         // =====================================================
@@ -47,7 +53,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             int eventId)
         {
             var eventItem =
-                await _eventRepository.GetByIdAsync(eventId);
+                await _eventRepository.GetByIdAsync(
+                    eventId);
 
             if (eventItem == null)
             {
@@ -55,7 +62,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "Event was not found.");
             }
 
-            return MapToResponse(eventItem);
+            return MapToResponse(
+                eventItem);
         }
 
         // =====================================================
@@ -69,7 +77,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                 dto.EndDateTime);
 
             var venue =
-                await _venueRepository.GetByIdAsync(dto.VenueId);
+                await _venueRepository.GetByIdAsync(
+                    dto.VenueId);
 
             if (venue == null)
             {
@@ -91,7 +100,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
 
             var category =
                 await _eventCategoryRepository
-                    .GetByIdAsync(dto.EventCategoryId);
+                    .GetByIdAsync(
+                        dto.EventCategoryId);
 
             if (category == null)
             {
@@ -106,10 +116,11 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             }
 
             var hasOverlap =
-                await _eventRepository.HasOverlappingEventAsync(
-                    dto.VenueId,
-                    dto.StartDateTime,
-                    dto.EndDateTime);
+                await _eventRepository
+                    .HasOverlappingEventAsync(
+                        dto.VenueId,
+                        dto.StartDateTime,
+                        dto.EndDateTime);
 
             if (hasOverlap)
             {
@@ -119,7 +130,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
 
             var eventItem = new Event
             {
-                Name = dto.Name.Trim(),
+                Name =
+                    dto.Name.Trim(),
 
                 Description =
                     dto.Description.Trim(),
@@ -149,11 +161,12 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     DateTime.UtcNow
             };
 
-            await _eventRepository.AddAsync(eventItem);
+            await _eventRepository.AddAsync(
+                eventItem);
 
-            await _eventRepository.SaveChangesAsync();
+            await _eventRepository
+                .SaveChangesAsync();
 
-            // Reload to include Venue and Category
             var createdEvent =
                 await _eventRepository.GetByIdAsync(
                     eventItem.EventId);
@@ -164,7 +177,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "Event was created but could not be retrieved.");
             }
 
-            return MapToResponse(createdEvent);
+            return MapToResponse(
+                createdEvent);
         }
 
         // =====================================================
@@ -175,7 +189,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             UpdateEventDto dto)
         {
             var eventItem =
-                await _eventRepository.GetByIdAsync(eventId);
+                await _eventRepository.GetByIdAsync(
+                    eventId);
 
             if (eventItem == null)
             {
@@ -188,7 +203,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                 dto.EndDateTime);
 
             var venue =
-                await _venueRepository.GetByIdAsync(dto.VenueId);
+                await _venueRepository.GetByIdAsync(
+                    dto.VenueId);
 
             if (venue == null)
             {
@@ -210,7 +226,8 @@ namespace EventParkingReservationSystem.API.Services.Implementations
 
             var category =
                 await _eventCategoryRepository
-                    .GetByIdAsync(dto.EventCategoryId);
+                    .GetByIdAsync(
+                        dto.EventCategoryId);
 
             if (category == null)
             {
@@ -225,11 +242,12 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             }
 
             var hasOverlap =
-                await _eventRepository.HasOverlappingEventAsync(
-                    dto.VenueId,
-                    dto.StartDateTime,
-                    dto.EndDateTime,
-                    eventId);
+                await _eventRepository
+                    .HasOverlappingEventAsync(
+                        dto.VenueId,
+                        dto.StartDateTime,
+                        dto.EndDateTime,
+                        eventId);
 
             if (hasOverlap)
             {
@@ -237,12 +255,35 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "The selected venue already has another event during this time.");
             }
 
-            // IMPORTANT:
-            // BRD says event capacity cannot be reduced below
-            // already booked seats.
-            //
-            // Booking/Seat module is not available yet.
-            // We will integrate that validation later.
+            // =================================================
+            // Capacity Safeguard 1
+            // Cannot reduce below active booked/reserved seats
+            // =================================================
+            var activeBookedSeatCount =
+                await _bookingRepository
+                    .GetActiveBookedSeatCountForEventAsync(
+                        eventId);
+
+            if (dto.Capacity < activeBookedSeatCount)
+            {
+                throw new InvalidOperationException(
+                    $"Event capacity cannot be reduced to {dto.Capacity} because {activeBookedSeatCount} seat(s) are currently reserved or booked.");
+            }
+
+            // =================================================
+            // Capacity Safeguard 2
+            // Cannot reduce below existing seat layout
+            // =================================================
+            var existingSeatCount =
+                await _seatRepository
+                    .GetSeatCountByEventAsync(
+                        eventId);
+
+            if (dto.Capacity < existingSeatCount)
+            {
+                throw new InvalidOperationException(
+                    $"Event capacity cannot be reduced to {dto.Capacity} because the current seat layout contains {existingSeatCount} seat(s). Remove unused seats before reducing the event capacity.");
+            }
 
             eventItem.Name =
                 dto.Name.Trim();
@@ -274,12 +315,15 @@ namespace EventParkingReservationSystem.API.Services.Implementations
             eventItem.UpdatedAt =
                 DateTime.UtcNow;
 
-            await _eventRepository.UpdateAsync(eventItem);
+            await _eventRepository.UpdateAsync(
+                eventItem);
 
-            await _eventRepository.SaveChangesAsync();
+            await _eventRepository
+                .SaveChangesAsync();
 
             var updatedEvent =
-                await _eventRepository.GetByIdAsync(eventId);
+                await _eventRepository.GetByIdAsync(
+                    eventId);
 
             if (updatedEvent == null)
             {
@@ -287,16 +331,20 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "Event was updated but could not be retrieved.");
             }
 
-            return MapToResponse(updatedEvent);
+            return MapToResponse(
+                updatedEvent);
         }
 
         // =====================================================
         // Delete Event
+        // Cannot delete if any booking history exists
         // =====================================================
-        public async Task<string> DeleteAsync(int eventId)
+        public async Task<string> DeleteAsync(
+            int eventId)
         {
             var eventItem =
-                await _eventRepository.GetByIdAsync(eventId);
+                await _eventRepository.GetByIdAsync(
+                    eventId);
 
             if (eventItem == null)
             {
@@ -304,9 +352,22 @@ namespace EventParkingReservationSystem.API.Services.Implementations
                     "Event was not found.");
             }
 
-            await _eventRepository.DeleteAsync(eventItem);
+            var hasBookings =
+                await _bookingRepository
+                    .HasAnyBookingForEventAsync(
+                        eventId);
 
-            await _eventRepository.SaveChangesAsync();
+            if (hasBookings)
+            {
+                throw new InvalidOperationException(
+                    "This event cannot be deleted because booking records already exist for the event.");
+            }
+
+            await _eventRepository.DeleteAsync(
+                eventItem);
+
+            await _eventRepository
+                .SaveChangesAsync();
 
             return "Event deleted successfully.";
         }
