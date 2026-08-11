@@ -291,7 +291,15 @@ if (app.Environment.IsDevelopment())
 // =====================================================
 // HTTP Request Pipeline
 // =====================================================
+
 app.UseHttpsRedirection();
+
+
+// Enable wwwroot frontend
+app.UseDefaultFiles();
+
+app.UseStaticFiles();
+
 
 app.UseAuthentication();
 
@@ -301,10 +309,12 @@ app.UseAuthorization();
 // =====================================================
 // Controllers
 // =====================================================
+
 app.MapControllers();
 
 
 // =====================================================
 // Run
 // =====================================================
+
 app.Run();

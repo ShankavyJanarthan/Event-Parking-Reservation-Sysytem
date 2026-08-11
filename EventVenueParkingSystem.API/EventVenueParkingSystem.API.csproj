@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="Middleware\" />
+    <Folder Include="wwwroot\assets\" />
   </ItemGroup>
 
 </Project>
