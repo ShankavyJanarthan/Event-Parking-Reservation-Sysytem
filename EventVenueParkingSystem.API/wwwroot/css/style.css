@@ -23,6 +23,7 @@ body {
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0,0,0,.15);
     text-align: center;
+    animation: slide .5s ease;
 }
 
 
@@ -38,7 +39,8 @@ h1 {
 
 /* Inputs */
 
-input, select {
+input,
+select {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
@@ -49,7 +51,7 @@ input, select {
 
 
 
-/* Button */
+/* Buttons */
 
 .btn {
     display: inline-block;
@@ -62,11 +64,14 @@ input, select {
     cursor: pointer;
     text-decoration: none;
     font-weight: 600;
+    transition: .3s;
 }
+
 
 
     .btn:hover {
         background: #1d4ed8;
+        transform: scale(1.05);
     }
 
 
@@ -76,9 +81,11 @@ input, select {
 }
 
 
+
 .red {
     background: #dc2626;
 }
+
 
 
 /* Navbar */
@@ -91,6 +98,7 @@ input, select {
 }
 
 
+
     .navbar a {
         color: white;
         text-decoration: none;
@@ -100,7 +108,6 @@ input, select {
 
 
 /* Dashboard */
-
 
 .dashboard-grid {
     display: grid;
@@ -116,6 +123,7 @@ input, select {
     color: white;
     padding: 25px;
     border-radius: 18px;
+    animation: fade .5s ease;
 }
 
 
@@ -127,8 +135,7 @@ input, select {
 
 
 
-/* Event Card */
-
+/* Event / Booking Card */
 
 .card {
     background: white;
@@ -136,6 +143,104 @@ input, select {
     margin: 15px 0;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,.1);
+    animation: fade .4s ease;
+}
+
+
+
+/* Payment */
+
+.payment-box {
+    border-top: 5px solid #16a34a;
+}
+
+
+
+#loader {
+    color: #2563eb;
+    font-weight: bold;
+    margin: 10px;
+}
+
+
+
+/* Seat Layout */
+
+
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(8,50px);
+    gap: 15px;
+    justify-content: center;
+}
+
+
+
+.design-seat,
+.seat {
+    width: 50px;
+    height: 50px;
+    background: #22c55e;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+
+
+    .seat.selected,
+    .design-seat.selected {
+        background: #2563eb;
+    }
+
+
+
+    .seat.booked {
+        background: #dc2626;
+        cursor: not-allowed;
+    }
+
+
+
+    .seat.vip,
+    .design-seat.vip {
+        background: #eab308;
+    }
+
+
+
+/* Animations */
+
+
+@keyframes slide {
+
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
+
+@keyframes fade {
+
+    from {
+        opacity: 0;
+    }
+
+
+    to {
+        opacity: 1;
+    }
 }
 
 
@@ -144,13 +249,21 @@ input, select {
 
 @media(max-width:600px) {
 
+
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
 
 
+
     .navbar {
         flex-direction: column;
         gap: 10px;
+    }
+
+
+
+    .seat-grid {
+        grid-template-columns: repeat(4,50px);
     }
 }

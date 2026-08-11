@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Event Management
+    </title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+</head>
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Event Management
+        </h1>
+
+
+        <input id="eventName"
+               placeholder="Event Name">
+
+
+        <input id="eventDate"
+               type="date">
+
+
+        <input id="venueId"
+               placeholder="Venue ID">
+
+
+        <input id="categoryId"
+               placeholder="Category ID">
+
+
+        <input id="capacity"
+               placeholder="Capacity">
+
+
+
+        <button class="btn green"
+                onclick="saveEvent()">
+
+            Create Event
+
+        </button>
+
+
+
+        <div id="eventList"></div>
+
+
+    </div>
+
+
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api.js"></script>
+
+
+    <script>
+
+
+async function loadEvents()
+{
+
+
+let events =
+await apiCall(
+"/events"
+);
+
+
+
+let html="";
+
+
+
+events.forEach(e=>{
+
+
+html+=`
+
+<div class="card">
+
+<h3>
+${e.eventName}
+</h3>
+
+
+<p>
+Date:
+${e.eventDate}
+</p>
+
+
+<p>
+Capacity:
+${e.capacity}
+</p>
+
+
+<button class="btn red"
+onclick="deleteEvent(${e.eventId})">
+
+Delete
+
+</button>
+
+
+</div>
+
+`;
+
+});
+
+
+document.getElementById("eventList")
+.innerHTML=html;
+
+
+}
+
+
+
+
+async function saveEvent()
+{
+
+
+let data={
+
+
+eventName:
+document.getElementById("eventName").value,
+
+
+eventDate:
+document.getElementById("eventDate").value,
+
+
+venueId:
+Number(
+document.getElementById("venueId").value
+),
+
+
+categoryId:
+Number(
+document.getElementById("categoryId").value
+),
+
+
+capacity:
+Number(
+document.getElementById("capacity").value
+)
+
+
+};
+
+
+
+await apiCall(
+
+"/events",
+
+"POST",
+
+data
+
+);
+
+
+
+alert(
+"Event Created"
+);
+
+
+
+loadEvents();
+
+
+}
+
+
+
+
+
+async function deleteEvent(id)
+{
+
+
+await apiCall(
+
+"/events/"+id,
+
+"DELETE"
+
+);
+
+
+loadEvents();
+
+
+}
+
+
+
+loadEvents();
+
+
+    </script>
+
+
+</body>
+
+</html>
