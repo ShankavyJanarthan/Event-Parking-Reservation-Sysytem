@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Seat Layout Management
+    </title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+</head>
+
+
+<body>
+
+
+    <div class="navbar">
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+        <a href="events.html">
+            Events
+        </a>
+
+        <a href="seats.html">
+            Seats
+        </a>
+
+    </div>
+
+
+
+    <div class="box">
+
+
+        <h1>
+            Seat Layout Management
+        </h1>
+
+
+
+        <input id="eventId"
+               placeholder="Event ID">
+
+
+
+        <input id="seatNumber"
+               placeholder="Seat Number (A1)">
+
+
+
+        <select id="seatType">
+
+            <option value="Regular">
+                Regular
+            </option>
+
+            <option value="VIP">
+                VIP
+            </option>
+
+            <option value="Premium">
+                Premium
+            </option>
+
+
+        </select>
+
+
+
+        <button class="btn green"
+                onclick="addSeat()">
+
+            Add Seat
+
+        </button>
+
+
+
+        <button class="btn"
+                onclick="validateLayout()">
+
+            Validate Layout
+
+        </button>
+
+
+
+        <hr>
+
+
+        <h2>
+            Seat List
+        </h2>
+
+
+        <div id="seatList">
+
+        </div>
+
+
+
+        <p id="message"></p>
+
+
+    </div>
+
+
+
+
+    <script src="../../js/config.js"></script>
+
+    <script src="../../js/api.js"></script>
+
+
+
+    <script>
+
+
+        async function loadSeats() {
+
+
+            let eventId =
+                document.getElementById("eventId").value;
+
+
+
+            if (!eventId)
+                return;
+
+
+
+            let seats =
+                await apiCall(
+
+                    "/seats/event/" + eventId,
+
+                    "GET"
+
+                );
+
+
+
+            let html = "";
+
+
+
+            seats.forEach(s => {
+
+
+                html += `
+
+
+<div class="card">
+
+
+<h3>
+Seat:
+${s.seatNumber}
+</h3>
+
+
+<p>
+Type:
+${s.seatType}
+</p>
+
+
+<button
+class="btn red"
+
+onclick="deleteSeat(${s.seatId})">
+
+Delete
+
+</button>
+
+
+</div>
+
+
+`;
+
+
+
+            });
+
+
+
+            document.getElementById("seatList")
+                .innerHTML =
+                html;
+
+
+        }
+
+
+
+
+
+        async function addSeat() {
+
+
+            let data = {
+
+
+                eventId:
+                    Number(
+                        document.getElementById("eventId").value
+                    ),
+
+
+                seatNumber:
+                    document.getElementById("seatNumber").value,
+
+
+                seatType:
+                    document.getElementById("seatType").value
+
+
+            };
+
+
+
+            try {
+
+
+                await apiCall(
+
+                    "/seats",
+
+                    "POST",
+
+                    data
+
+                );
+
+
+
+                document.getElementById("message")
+                    .innerHTML =
+                    "Seat Added";
+
+
+                loadSeats();
+
+
+            }
+
+            catch (error) {
+
+                document.getElementById("message")
+                    .innerHTML =
+                    error.message;
+
+
+            }
+
+
+        }
+
+
+
+
+        async function deleteSeat(id) {
+
+
+            await apiCall(
+
+                "/seats/" + id,
+
+                "DELETE"
+
+            );
+
+
+            loadSeats();
+
+
+        }
+
+
+
+
+
+        async function validateLayout() {
+
+
+            let eventId =
+                document.getElementById("eventId").value;
+
+
+
+            let result =
+                await apiCall(
+
+                    "/seats/event/" + eventId + "/validate-layout",
+
+                    "POST"
+
+                );
+
+
+
+            document.getElementById("message")
+                .innerHTML =
+                "Layout Validated";
+
+
+        }
+
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>

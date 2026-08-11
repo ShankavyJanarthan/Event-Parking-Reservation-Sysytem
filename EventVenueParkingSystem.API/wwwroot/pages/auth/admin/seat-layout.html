@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Seat Designer
+    </title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+
+    <style>
+
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(8,50px);
+            gap: 15px;
+        }
+
+
+
+        .design-seat {
+            width: 50px;
+            height: 50px;
+            background: #22c55e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: grab;
+        }
+
+
+            .design-seat.vip {
+                background: #eab308;
+            }
+
+
+            .design-seat.selected {
+                background: #2563eb;
+            }
+    </style>
+
+
+</head>
+
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Seat Layout Designer
+        </h1>
+
+
+        <div class="seat-grid"
+             id="grid">
+
+
+        </div>
+
+
+
+        <button class="btn green">
+
+            Save Layout
+
+        </button>
+
+
+    </div>
+
+
+
+    <script>
+
+
+let grid=
+document.getElementById("grid");
+
+
+
+for(let i=1;i<=40;i++)
+{
+
+
+let seat=
+document.createElement("div");
+
+
+seat.className=
+"design-seat";
+
+
+seat.innerHTML=
+"A"+i;
+
+
+
+seat.draggable=true;
+
+
+
+seat.onclick=function(){
+
+seat.classList.toggle("selected");
+
+};
+
+
+
+grid.appendChild(seat);
+
+
+}
+
+
+    </script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Category Management
+    </title>
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+</head>
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Event Categories
+        </h1>
+
+
+        <input id="categoryName"
+               placeholder="Category Name">
+
+
+        <button class="btn green"
+                onclick="saveCategory()">
+
+            Save Category
+
+        </button>
+
+
+        <div id="categoryList"></div>
+
+
+    </div>
+
+
+
+    <script src="../../js/config.js"></script>
+    <script src="../../js/api.js"></script>
+
+
+    <script>
+
+
+async function loadCategories()
+{
+
+let data =
+await apiCall(
+"/event-categories"
+);
+
+
+let html="";
+
+
+data.forEach(c=>{
+
+
+html+=`
+
+<div class="card">
+
+<h3>
+${c.categoryName}
+</h3>
+
+
+<button class="btn red"
+onclick="deleteCategory(${c.categoryId})">
+
+Delete
+
+</button>
+
+
+</div>
+
+`;
+
+});
+
+
+document.getElementById("categoryList")
+.innerHTML=html;
+
+
+}
+
+
+
+async function saveCategory()
+{
+
+
+let data={
+
+categoryName:
+document.getElementById("categoryName").value
+
+};
+
+
+
+await apiCall(
+
+"/event-categories",
+
+"POST",
+
+data
+
+);
+
+
+alert(
+"Category Added"
+);
+
+
+loadCategories();
+
+
+}
+
+
+
+async function deleteCategory(id)
+{
+
+
+await apiCall(
+
+"/event-categories/"+id,
+
+"DELETE"
+
+);
+
+
+loadCategories();
+
+
+}
+
+
+
+loadCategories();
+
+
+    </script>
+
+
+</body>
+
+</html>

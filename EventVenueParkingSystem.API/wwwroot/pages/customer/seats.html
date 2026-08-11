@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Select Seat
+    </title>
+
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+
+    <style>
+
+        .seat-container {
+            display: grid;
+            grid-template-columns: repeat(5,50px);
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+
+        .seat {
+            width: 50px;
+            height: 50px;
+            background: #22c55e;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+
+            .seat.selected {
+                background: #2563eb;
+            }
+
+
+            .seat.booked {
+                background: #dc2626;
+                cursor: not-allowed;
+            }
+
+
+        .legend {
+            margin-top: 20px;
+        }
+
+
+        .box {
+            width: 500px;
+        }
+    </style>
+
+
+</head>
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Select Your Seat
+        </h1>
+
+
+        <div>
+
+            <span>
+                Event ID:
+            </span>
+
+
+            <input id="eventId"
+                   placeholder="Enter Event ID">
+
+
+            <button class="btn"
+                    onclick="loadSeats()">
+
+                Load Seats
+
+            </button>
+
+        </div>
+
+
+        <div id="seatArea"
+             class="seat-container">
+
+        </div>
+
+
+
+        <div class="legend">
+
+            <p>
+                🟢 Available
+            </p>
+
+            <p>
+                🔵 Selected
+            </p>
+
+            <p>
+                🔴 Booked
+            </p>
+
+        </div>
+
+
+        <button class="btn green"
+                onclick="continueBooking()">
+
+            Continue
+
+        </button>
+
+
+
+        <p id="msg"></p>
+
+
+    </div>
+
+
+
+
+    <script src="../../js/config.js"></script>
+
+    <script src="../../js/api.js"></script>
+
+    <script src="../../js/customer/seats.js"></script>
+
+
+</body>
+
+</html>

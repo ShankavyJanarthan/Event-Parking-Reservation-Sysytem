@@ -1,0 +1,355 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Parking Slot Management
+    </title>
+
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+
+</head>
+
+
+<body>
+
+
+    <div class="navbar">
+
+
+        <a href="dashboard.html">
+            Dashboard
+        </a>
+
+
+        <a href="events.html">
+            Events
+        </a>
+
+
+        <a href="seats.html">
+            Seats
+        </a>
+
+
+        <a href="parking.html">
+            Parking
+        </a>
+
+
+    </div>
+
+
+
+
+    <div class="box">
+
+
+        <h1>
+            Parking Slot Management
+        </h1>
+
+
+
+
+        <input id="eventId"
+               placeholder="Event ID">
+
+
+
+        <input id="slotNumber"
+               placeholder="Parking Slot Number (P1)">
+
+
+
+        <select id="slotType">
+
+
+            <option value="Car">
+                Car
+            </option>
+
+
+            <option value="Bike">
+                Bike
+            </option>
+
+
+            <option value="VIP">
+                VIP
+            </option>
+
+
+        </select>
+
+
+
+
+        <button class="btn green"
+                onclick="addParking()">
+
+            Add Parking Slot
+
+        </button>
+
+
+
+
+        <button class="btn"
+                onclick="loadParking()">
+
+            View Slots
+
+        </button>
+
+
+
+
+        <hr>
+
+
+
+        <h2>
+            Parking Slots
+        </h2>
+
+
+
+        <div id="parkingList">
+
+        </div>
+
+
+
+        <p id="message"></p>
+
+
+
+
+    </div>
+
+
+
+
+
+    <script src="../../js/config.js"></script>
+
+    <script src="../../js/api.js"></script>
+
+
+
+
+    <script>
+
+
+
+async function loadParking()
+{
+
+
+let eventId =
+document.getElementById("eventId").value;
+
+
+
+if(!eventId)
+{
+
+alert(
+"Enter Event ID"
+);
+
+return;
+
+}
+
+
+
+let slots =
+await apiCall(
+
+"/parking-slots/event/"+eventId,
+
+"GET"
+
+);
+
+
+
+
+let html="";
+
+
+
+slots.forEach(p=>{
+
+
+html += `
+
+
+<div class="card">
+
+
+<h3>
+
+Slot:
+${p.slotNumber}
+
+</h3>
+
+
+
+<p>
+
+Type:
+${p.slotType}
+
+</p>
+
+
+
+
+<button
+
+class="btn red"
+
+onclick="deleteParking(${p.parkingSlotId})">
+
+Delete
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+document.getElementById("parkingList")
+.innerHTML =
+html;
+
+
+}
+
+
+
+
+async function addParking()
+{
+
+
+let data =
+{
+
+
+eventId:
+
+Number(
+document.getElementById("eventId").value
+),
+
+
+
+slotNumber:
+
+document.getElementById("slotNumber").value,
+
+
+
+slotType:
+
+document.getElementById("slotType").value
+
+
+
+};
+
+
+
+
+try
+{
+
+
+await apiCall(
+
+"/parking-slots",
+
+"POST",
+
+data
+
+);
+
+
+
+document.getElementById("message")
+.innerHTML =
+"Parking Slot Added";
+
+
+
+loadParking();
+
+
+}
+
+catch(error)
+{
+
+
+document.getElementById("message")
+.innerHTML =
+error.message;
+
+
+}
+
+
+}
+
+
+
+
+
+async function deleteParking(id)
+{
+
+
+await apiCall(
+
+"/parking-slots/"+id,
+
+"DELETE"
+
+);
+
+
+
+loadParking();
+
+
+}
+
+
+
+
+
+    </script>
+
+
+
+</body>
+
+</html>

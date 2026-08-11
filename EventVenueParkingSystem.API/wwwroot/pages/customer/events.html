@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>
+        Browse Events
+    </title>
+
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+
+</head>
+
+
+<body>
+
+
+    <div class="box">
+
+
+        <h1>
+            Browse Events
+        </h1>
+
+
+        <input id="search"
+               placeholder="Search Event Name">
+
+
+        <br>
+
+
+        <select id="venue">
+
+            <option value="">
+                All Venues
+            </option>
+
+        </select>
+
+
+        <br>
+
+
+        <select id="category">
+
+            <option value="">
+                All Categories
+            </option>
+
+        </select>
+
+
+        <br>
+
+
+        <button class="btn"
+                onclick="loadEvents()">
+
+            Search
+
+        </button>
+
+
+
+        <div id="list"></div>
+
+
+
+    </div>
+
+
+
+    <script src="../../js/config.js"></script>
+
+    <script src="../../js/api.js"></script>
+
+    <script src="../../js/customer/events.js"></script>
+
+
+</body>
+
+</html>
